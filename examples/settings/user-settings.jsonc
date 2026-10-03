@@ -1,0 +1,16 @@
+// EXAMPLE user settings (settings.json) for a developer who wants every consequential
+// tool call confirmed by a human. Organization policies override these values.
+{
+  // This extension: show its own modal (cannot be auto-approved by VS Code) instead of
+  // VS Code's tool confirmation. Application scope: a workspace cannot turn it off.
+  "nativeToolTemplate.approval.requireExtensionConfirmation": true,
+
+  // VS Code: never offer "always allow" for this tool, always ask.
+  // Key: '<publisher>.<extension-name>/<toolReferenceName>' (check on your VS Code version).
+  "chat.tools.eligibleForAutoApproval": {
+    "example.native-tool-template/createNote": false
+  },
+
+  // VS Code: do not auto-approve all tools.
+  "chat.tools.global.autoApprove": false
+}

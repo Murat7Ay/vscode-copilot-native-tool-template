@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The engines.vscode minimum and the current stable. Add your company baseline here.
+        vscode: ['1.99.3', 'stable']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - name: Integration tests (real VS Code extension host)
+        run: xvfb-run -a npm run test:integration
+        env:
+          VSCODE_TEST_VERSION: ${{ matrix.vscode }}
+      - name: Package VSIX
+        if: matrix.vscode == 'stable'
+        run: npm run package
+      - uses: actions/upload-artifact@v4
+        if: matrix.vscode == 'stable'
+        with:
+          name: vsix
+          path: dist/*.vsix
+
+  release:
+    # Attach the VSIX to a GitHub release when a v* tag is pushed. Works without GitHub Enterprise.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vsix
+      - run: gh release create "$GITHUB_REF_NAME" *.vsix --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --notes "VSIX for $GITHUB_REF_NAME"
+        env:
+          GH_TOKEN: ${{ github.token }}

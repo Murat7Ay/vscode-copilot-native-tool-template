@@ -1,0 +1,240 @@
+{
+  "name": "native-tool-template",
+  "displayName": "Native Tool Template",
+  "description": "Template for native VS Code Language Model Tools where AI proposes, the extension validates, a human approves, and only then the extension executes.",
+  "version": "0.1.0",
+  "publisher": "example",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Murat7Ay/vscode-copilot-native-tool-template.git"
+  },
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "AI",
+    "Chat"
+  ],
+  "keywords": [
+    "language model tools",
+    "agent",
+    "tool approval"
+  ],
+  "main": "./out/src/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "configuration": {
+      "title": "Native Tool Template",
+      "properties": {
+        "nativeToolTemplate.approval.requireExtensionConfirmation": {
+          "type": "boolean",
+          "default": false,
+          "scope": "application",
+          "markdownDescription": "When enabled, tools that normally rely on the VS Code tool confirmation instead show this extension's own modal confirmation, which VS Code tool auto-approval cannot skip. Application scope: a workspace cannot turn this off."
+        }
+      }
+    },
+    "languageModelTools": [
+      {
+        "name": "template_inspect_selection",
+        "displayName": "Inspect Selection",
+        "toolReferenceName": "inspectSelection",
+        "canBeReferencedInPrompt": true,
+        "icon": "$(search)",
+        "userDescription": "Read-only: returns the active file, language and selected text.",
+        "modelDescription": "Returns read-only information about the active editor in VS Code: the workspace-relative file path, language id, selection range and the selected text (truncated to maxCharacters). Use this to understand code the user has selected. It never modifies anything. Returns a message saying there is no active editor if none is open.",
+        "tags": [
+          "template",
+          "read-only"
+        ],
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "maxCharacters": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20000,
+              "description": "Maximum number of selected characters to return. Defaults to 4000."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "template_prepare_editorconfig",
+        "displayName": "Prepare EditorConfig",
+        "toolReferenceName": "prepareEditorConfig",
+        "canBeReferencedInPrompt": true,
+        "icon": "$(settings-gear)",
+        "userDescription": "Prepare-only: proposes .editorconfig content without writing anything.",
+        "modelDescription": "Computes the content of an .editorconfig file from the given formatting preferences and returns it, together with whether an .editorconfig already exists. It never writes anything: show the proposal to the user, and only write it with a tool that asks for confirmation if the user wants it.",
+        "tags": [
+          "template",
+          "prepare"
+        ],
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "indentStyle": {
+              "type": "string",
+              "enum": [
+                "space",
+                "tab"
+              ],
+              "description": "Indent with spaces or tabs."
+            },
+            "indentSize": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8,
+              "description": "Indent width. Defaults to 2 for spaces, 4 for tabs."
+            },
+            "endOfLine": {
+              "type": "string",
+              "enum": [
+                "lf",
+                "crlf"
+              ],
+              "description": "Line endings. Defaults to lf."
+            },
+            "insertFinalNewline": {
+              "type": "boolean",
+              "description": "End files with a newline. Defaults to true."
+            }
+          },
+          "required": [
+            "indentStyle"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "template_create_note",
+        "displayName": "Create Note",
+        "toolReferenceName": "createNote",
+        "canBeReferencedInPrompt": true,
+        "icon": "$(new-file)",
+        "userDescription": "Creates a Markdown note under notes/ in the workspace after you confirm.",
+        "modelDescription": "Creates a Markdown note file at notes/<slug>.md in the first workspace folder, where <slug> is derived from the title. The user is asked to confirm before anything is written. If the file already exists the call fails unless overwrite is true, and overwriting requires an additional explicit confirmation. If the user declines, do not retry unless the user asks.",
+        "tags": [
+          "template",
+          "mutate"
+        ],
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "description": "Title of the note. Used as the heading and to derive the file name."
+            },
+            "body": {
+              "type": "string",
+              "maxLength": 20000,
+              "description": "Markdown body of the note."
+            },
+            "overwrite": {
+              "type": "boolean",
+              "description": "Replace the note if it already exists. Defaults to false."
+            }
+          },
+          "required": [
+            "title",
+            "body"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "template_project_operation",
+        "displayName": "Project Operation",
+        "toolReferenceName": "projectOperation",
+        "canBeReferencedInPrompt": true,
+        "icon": "$(checklist)",
+        "userDescription": "Proposes a project operation and opens a review form pre-filled by the AI.",
+        "modelDescription": "Proposes a project operation for human review. Fill in as many fields as you can infer from the conversation and workspace; leave a field out if you are unsure. The extension opens a review form pre-populated with your values, the user may edit any field, and nothing happens unless the user submits the form. mode 'preview' only reports what would be recorded; mode 'record' writes a record to .project-operations/<name>.json. The result tells you which fields the user changed. If the user cancels, do not retry unless the user asks.",
+        "tags": [
+          "template",
+          "mutate",
+          "form"
+        ],
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Identifier for the operation: a letter, then letters, digits, '-' or '_' (3-64 characters)."
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 500,
+              "description": "Short human-readable description of what the operation is for."
+            },
+            "target": {
+              "type": "string",
+              "maxLength": 260,
+              "description": "Workspace-relative path of the file or folder the operation concerns, using '/' separators."
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "preview",
+                "record"
+              ],
+              "description": "'preview' reports without writing; 'record' writes the operation record."
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "low",
+                "normal",
+                "high"
+              ],
+              "description": "Priority of the operation. Defaults to 'normal'."
+            },
+            "tags": {
+              "type": "array",
+              "maxItems": 10,
+              "items": {
+                "type": "string",
+                "maxLength": 32
+              },
+              "description": "Optional labels."
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3600,
+              "description": "Timeout for the operation in seconds. Defaults to 60."
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint .",
+    "test": "npm run compile && node --test \"out/test/unit/**/*.test.js\"",
+    "test:integration": "npm run compile && node ./out/test/integration/runTests.js",
+    "package": "node -e \"require('fs').mkdirSync('dist',{recursive:true})\" && vsce package --out dist/",
+    "verify": "npm run lint && npm test && npm run package",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "1.99.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
+    "eslint": "^10.0.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0"
+  }
+}

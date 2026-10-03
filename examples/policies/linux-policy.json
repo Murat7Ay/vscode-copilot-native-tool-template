@@ -1,0 +1,6 @@
+{
+  "ChatToolsAutoApprove": false,
+  "ChatToolsEligibleForAutoApproval": "{\"example.native-tool-template/createNote\": false}",
+  "AllowedExtensions": "{\"github.copilot-chat\": true, \"example.native-tool-template\": [\"0.1.0\"], \"*\": false}",
+  "UpdateMode": "manual"
+}

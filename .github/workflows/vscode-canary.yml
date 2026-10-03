@@ -1,0 +1,28 @@
+name: VS Code canary
+
+# Early warning: run the integration tests against the newest VS Code builds every week.
+# A failure here means an upcoming VS Code version changes something the template relies on.
+# See docs/MAINTENANCE.md.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        vscode: ['1.99.3', 'stable', 'insiders']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: xvfb-run -a npm run test:integration
+        env:
+          VSCODE_TEST_VERSION: ${{ matrix.vscode }}
