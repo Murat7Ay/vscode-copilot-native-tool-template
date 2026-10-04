@@ -1,4 +1,26 @@
-# Native Tool Template
+<div align="center">
+
+# 🛡️ VS Code Native Tool Template
+
+**Build AI tools for VS Code agent mode where the AI *proposes* and a human *approves*,
+before anything actually happens.**
+
+[![CI](https://github.com/Murat7Ay/vscode-copilot-native-tool-template/actions/workflows/ci.yml/badge.svg)](https://github.com/Murat7Ay/vscode-copilot-native-tool-template/actions/workflows/ci.yml)
+[![VS Code canary](https://github.com/Murat7Ay/vscode-copilot-native-tool-template/actions/workflows/vscode-canary.yml/badge.svg)](https://github.com/Murat7Ay/vscode-copilot-native-tool-template/actions/workflows/vscode-canary.yml)
+![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.99-007ACC?logo=visualstudiocode)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![Stable APIs only](https://img.shields.io/badge/proposed%20APIs-none-brightgreen)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+[**Use this template**](https://github.com/Murat7Ay/vscode-copilot-native-tool-template/generate) ·
+[Architecture](docs/ARCHITECTURE.md) ·
+[Approval & security](docs/APPROVAL-AND-SECURITY.md) ·
+[Create a tool](docs/CREATING-A-TOOL.md) ·
+[Distribution](docs/DISTRIBUTION.md)
+
+</div>
+
+---
 
 A small, professional foundation for building **native VS Code Language Model Tools**
 (`vscode.lm.registerTool` + `contributes.languageModelTools`) that agent mode and other tool
@@ -9,6 +31,22 @@ It is not an MCP server, chat participant or chatbot. It is a plain VS Code exte
 contributes tools through the stable extension API, so it works with any consumer of that
 API (GitHub Copilot agent mode today), and it can be packaged as a `.vsix` and distributed
 internally.
+
+### Why this template
+
+- 🧾 **Proposal ≠ execution.** Tool calls go through one pipeline: validate → human review →
+  execute. Only that pipeline can run a tool, and tests prove declined or cancelled proposals never do.
+- 📝 **Review forms pre-filled by the AI.** Complex operations open a native form showing which
+  values the AI suggested, which you edited, and which are invalid.
+- 🔒 **Honest about approval.** VS Code's tool confirmation can be auto-approved by settings;
+  the extension's own modal and form cannot. The docs spell out what the extension, VS Code,
+  org policy and the user each guarantee.
+- 🧱 **Upgrade-proof.** Tools never import `vscode`; all VS Code code sits in one adapter folder.
+  Stable APIs only. CI tests the minimum (1.99) and current VS Code, plus a weekly Insiders canary.
+- 🏢 **Built for internal distribution.** VSIX packaging, release workflow, enterprise policy
+  examples, and a guide to pinning, updates and rollback.
+- 🤖 **AI-agent ready.** `AGENTS.md` and skills in `.claude/skills/` teach Copilot and Claude Code
+  to add new tools the safe way.
 
 ## The one idea: a tool call is a proposal, not an execution
 
